@@ -10,11 +10,10 @@ public class IntListExercises {
      */
     public static void addConstant(IntList lst, int c) {
         IntList head = lst;
-        while (head.rest != null) {
+        while (head != null) {
             head.first += c;
             head = head.rest;
         }
-        head.first += c; 
     }
 
     /**
@@ -39,6 +38,9 @@ public class IntListExercises {
 
     /** Returns the max value in the IntList starting at L. */
     public static int max(IntList L) {
+        if (L == null) {
+            return 0; 
+        }
         int max = L.first;
         IntList p = L.rest;
         while (p != null) {
