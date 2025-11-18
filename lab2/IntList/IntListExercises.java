@@ -14,6 +14,7 @@ public class IntListExercises {
             head.first += c;
             head = head.rest;
         }
+        head.first += c; 
     }
 
     /**
@@ -31,6 +32,9 @@ public class IntListExercises {
             }
             p = p.rest;
         }
+        if (firstDigitEqualsLastDigit(max(p))) {
+                p.first = 0;
+            }
     }
 
     /** Returns the max value in the IntList starting at L. */
@@ -77,6 +81,6 @@ public class IntListExercises {
             lst.first *= lst.first;
         }
 
-        return currElemIsPrime || squarePrimes(lst.rest);
+        return squarePrimes(lst.rest) || currElemIsPrime;
     }
 }
