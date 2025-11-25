@@ -5,7 +5,7 @@ import java.util.Observable;
 
 
 /** The state of a game of 2048.
- *  @author TODO: YOUR NAME HERE
+ *  @author Lan
  */
 public class Model extends Observable {
     /** Current contents of the board. */
@@ -114,11 +114,87 @@ public class Model extends Observable {
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
 
+        boolean isChanged = false; 
+
+        board.setViewingPerspective(side); 
+
+        for (int col = 0; col < board.size(); col++) {
+            isChanged = isChanged | processSingleCol(col);
+        }
+
+        if (isChanged) {
+            changed = isChanged;
+        }
+
+        board.setViewingPerspective(Side.NORTH);
+
         checkGameOver();
         if (changed) {
             setChanged();
         }
         return changed;
+    }
+
+    /** Consider the single column col to move the tiles
+     *  and return if current column is changed.
+    */
+    private boolean processSingleCol(int col) {
+        // Record the status if current row is merged.
+        boolean isChanged = false; 
+        boolean[] isMerged = new boolean[board.size()]; 
+
+        // Check each tile at position (col, row). 
+        for (int row = board.size() - 1; row >= 0; row--) { // 3 -> 2 -> 1 -> 0 until reach the bound.
+            if (board.tile(col, row) != null) { // Check if the tile exists.
+                Tile t = board.tile(col, row);  // Lock the target tile.
+                // Check if the parameter row is not spilled the boundary. 
+                ////if (row < board.size()) {
+                    // Move to the destinationRow (if can), change the status array(if moved).
+                    // board.move(col, destinationRow(col, row, isMerged), t); 
+                    // Get the status.
+                    int desRow = destinationRow(col, row, isMerged); 
+                    boolean merged = board.move(col, desRow, t);
+                    // Update status 'isChanged'.
+                    isChanged = isChanged | (desRow != row);
+                    if (merged) {
+                        // Add the score.
+                        score += board.tile(col, desRow).value();
+                    } 
+                //}
+            }
+        }
+        return isChanged; 
+    }
+
+    /** Return the destination of the row of the CURRENT COL. */
+    public int destinationRow(int col, int row, boolean[] isMerged) {
+        int desRow = row; // temp flag.
+        for (int targetRow = row + 1; targetRow < board.size(); targetRow++) { // Find
+            // If is empty or can be merged.
+            if (canMoveTo(col, row, targetRow)) {
+                desRow = targetRow;
+                continue;  // Continue to find deeper...
+            } else if (canMergeTo(col, row, targetRow, isMerged)) {
+                desRow = targetRow;
+                isMerged[desRow] = true; 
+                break;  // Get the final detinaiton.
+            } else {
+                break;
+            }
+        }
+        return desRow; 
+    }
+
+    /** If tile at (col, row) can move to (col, targetRow) */ 
+    public boolean canMoveTo(int col, int row, int targetRow) {
+        return board.tile(col, targetRow) == null;
+    }
+
+    /** If a tile havenot been merged and their values are equal, 
+     *  tile at (col, row) with (col, targetRow) can merge together at (col, targetRow).
+     */
+    public boolean canMergeTo(int col, int row, int targetRow, boolean[] isMerged){
+        return (!isMerged[targetRow] && board.tile(col, row).value() == board.tile(col, targetRow).value()); 
     }
 
     /** Checks if the game is over and sets the gameOver variable
@@ -138,6 +214,14 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
+        //Search, loop if all t.value() != null 
+        for (int col = 0; col < b.size(); col++) {
+            for (int row = 0; row < b.size(); row++) {
+                if (b.tile(col, row) == null) {
+                    return true; 
+                }
+            }
+        }
         return false;
     }
 
@@ -148,6 +232,16 @@ public class Model extends Observable {
      */
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
+        // Search if maxTile exists. For, if, .value = MAX_PIECE
+        for (int col = 0; col < b.size(); col++) {
+            for (int row = 0; row < b.size(); row++) {
+                if (b.tile(col, row) != null) {
+                    if (b.tile(col, row).value() == MAX_PIECE) {
+                        return true; 
+                    }
+                }
+            }
+        }
         return false;
     }
 
@@ -159,7 +253,47 @@ public class Model extends Observable {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
+        if (emptySpaceExists(b)) {
+            return true; 
+        } else {
+            // Compare with ALL SOUTHERN tile if exist.
+            for (int col = 0; col < b.size(); col++) {
+                // Check each col that if the FIRST EXIST came across tile can be merged.
+                for (int row = 0; row < b.size() - 1; row++) { // Just check first 3 tiles.
+                    //Find the first EXIST tile.
+                    for (int k = row + 1; k < b.size(); k++) {
+                        if (b.tile(col, k) != null) {
+                            // Found. Check whether the values equal.
+                            if (b.tile(col, row).value() == b.tile(col, k).value()) {
+                                return true; 
+                            } else {
+                                // Current tile cannot be merged anymore.
+                                break; 
+                            }
+                        }
+                    }
+                } 
+            }
+            // Compare with ALL EASTERN tile if exist.
+            for (int row = 0;row < b.size(); row++) {
+                // Check each row that if the FIRST EXIST came across tile can be merged.
+                for (int col = 0; col < b.size() - 1; col++) { // Just check first 3 tiles.
+                    //Find the first EXIST tile.
+                    for (int k = col + 1; k < b.size(); k++) {
+                        if (b.tile(k, row) != null) {
+                            // Found. Check whether the values equal.
+                            if (b.tile(col, row).value() == b.tile(k, row).value()) {
+                                return true; 
+                            } else {
+                                // Current tile cannot be merged anymore.
+                                break; 
+                            }
+                        }
+                    }
+                } 
+            }
         return false;
+        }
     }
 
 

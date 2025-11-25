@@ -97,7 +97,8 @@ public class Board implements Iterable<Tile> {
         if (tile1 == null) {
             values[pcol][prow] = tile.move(pcol, prow);
             return false;
-        } else {
+        } else { 
+            // Merged.
             values[pcol][prow] = tile.merge(pcol, prow, tile1);
             return true;
         }
