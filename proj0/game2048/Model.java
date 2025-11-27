@@ -149,17 +149,17 @@ public class Model extends Observable {
                 Tile t = board.tile(col, row);  // Lock the target tile.
                 // Check if the parameter row is not spilled the boundary. 
                 ////if (row < board.size()) {
-                    // Move to the destinationRow (if can), change the status array(if moved).
-                    // board.move(col, destinationRow(col, row, isMerged), t); 
-                    // Get the status.
-                    int desRow = destinationRow(col, row, isMerged); 
-                    boolean merged = board.move(col, desRow, t);
-                    // Update status 'isChanged'.
-                    isChanged = isChanged | (desRow != row);
-                    if (merged) {
-                        // Add the score.
-                        score += board.tile(col, desRow).value();
-                    } 
+                // Move to the destinationRow (if can), change the status array(if moved).
+                // board.move(col, destinationRow(col, row, isMerged), t); 
+                // Get the status.
+                int desRow = destinationRow(col, row, isMerged); 
+                boolean merged = board.move(col, desRow, t);
+                // Update status 'isChanged'.
+                isChanged = isChanged | (desRow != row);
+                if (merged) {
+                    // Add the score.
+                    score += board.tile(col, desRow).value();
+                } 
                 //}
             }
         }
