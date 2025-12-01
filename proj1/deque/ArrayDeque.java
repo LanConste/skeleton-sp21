@@ -1,6 +1,6 @@
 package deque;
 
-// TODO: Update all the index without size but nextFirst and nextLast.
+// TODO: Update the logic of get.
 public class ArrayDeque<T> {
     private T[] items;  // Pointer which points the address of the ArrayDeque.
     private int size;  // The size of the ArrayDeque.
@@ -23,11 +23,11 @@ public class ArrayDeque<T> {
     /** Check and implement resizeDeque if usageRate is lower than 0.25 
      *  or will be spilled after adding item. */
     private void checkResize() {
-        double usageRate = size / items.length;
-        if (usageRate < 0.25) {
-            resizeDeque((int) (size / 2));
+        double usageRate = (double) size / items.length;
+        if (usageRate < 0.25 && items.length >= 16) {
+            resizeDeque((int) (items.length / 2));
         } else if (isSpilled()) {
-            resizeDeque(size * 2);
+            resizeDeque(items.length * 2);
         }
     }
 
@@ -66,6 +66,8 @@ public class ArrayDeque<T> {
 
     /** Add item at the place of nextFirst */
     public void addFirst(T item) {
+        checkResize();
+
         items[nextFirst] = item;
 
         // Change the parameters.
@@ -75,6 +77,8 @@ public class ArrayDeque<T> {
 
     /** Add item at the place of nextLast */
     public void addLast(T item) {
+        checkResize();
+
         items[nextLast] = item;
 
         // Change the parameters.
@@ -87,27 +91,46 @@ public class ArrayDeque<T> {
     }
 
     public void printDeque() {
+        // Initiallize a pointer p.
+        int printedIndex = plusOne(nextFirst);
         for (int i = 0; i < size; i++) {
-            System.out.print(items[i]);
+            System.out.print(items[printedIndex]);
             System.out.print(" ");
+            // Update the pointer to keep circuit.
+            printedIndex = plusOne(printedIndex);
         }
         System.out.println();
     }
 
     public T removeFirst() {
+        int firstIndex = plusOne(nextFirst);
+        T returnItem = items[firstIndex];
+        items[firstIndex] = null;
 
+        nextFirst = plusOne(nextFirst);
         size--;
+        checkResize();
+
+        return returnItem;
     }
 
     public T removeLast() {
-        T returnItem = items[size];
-        items[size] = null;
+        int lastIndex = minusOne(nextLast);
+        T returnItem = items[lastIndex];
+        items[lastIndex] = null;
+
+        nextLast = minusOne(nextLast);
         size--;
+        checkResize();
         return returnItem;
     }
 
     public T get(int index) {
-        return items[];
+        int circuitIndex = plusOne(nextFirst);
+        for (int i = 0; i < index; i++) {
+            circuitIndex = plusOne(circuitIndex);
+        }
+        return items[circuitIndex];
     }
 
     public static main(String[] args) {
